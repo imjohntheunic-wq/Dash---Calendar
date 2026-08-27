@@ -306,3 +306,49 @@ body {
   font-size: 0.75rem;
   margin-bottom: 2px;
 }
+/* ==========================================
+   AJUSTES RESPONSIVOS (TELAS MENORES / CELULAR)
+   ========================================== */
+@media (max-width: 850px) {
+  /* Ajusta o espaçamento interno do app no celular */
+  body {
+    padding: 10px;
+  }
+  
+  .app-container {
+    padding: 12px;
+    width: 100%;
+  }
+
+  /* Faz a barra lateral ir para baixo e não espremer o calendário */
+  .main-layout {
+    flex-direction: column;
+  }
+  
+  .sidebar {
+    border-left: none;
+    border-top: 1px solid #eee;
+    padding-left: 0;
+    padding-top: 20px;
+  }
+
+  /* Garante que os dias da semana e os números fiquem do mesmo tamanho */
+  .weekdays-grid, 
+  .days-grid {
+    grid-template-columns: repeat(7, minmax(0, 1fr)); /* Impede que os quadros 'vazem' a tela */
+    gap: 2px; /* Reduz o espaço entre os dias no celular */
+  }
+
+  /* Ajusta o tamanho dos quadradinhos do dia no celular */
+  .days-grid div {
+    min-height: 55px; /* Altura menor para caber melhor na tela do celular */
+    padding: 2px;
+    font-size: 0.8rem;
+  }
+
+  /* Esconde ou reduz o texto das tags para não estourar a largura do dia */
+  .event-tag {
+    font-size: 9px;
+    padding: 1px 2px;
+  }
+}
