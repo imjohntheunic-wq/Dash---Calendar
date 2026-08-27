@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Gestão de Escala</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app-container">
+
+  <!-- Navegação por Abas -->
+  <div class="tabs-nav">
+    <button class="tab-btn active" onclick="openTab('tab-plantoes')">🚨 Plantões</button>
+    <button class="tab-btn" onclick="openTab('tab-ferias')">🏖️ Férias</button>
+    <button class="tab-btn" onclick="openTab('tab-aniversarios')">🎂 Aniversários</button>
+    <button class="tab-btn" onclick="openTab('tab-servidores')">👥 Servidores</button>
+    <button class="tab-btn" onclick="openTab('tab-recados')">📌 Recados</button>
+  </div>
+
+  <!-- ABA 1: PLANTÕES / CALENDÁRIO PRINCIPAL -->
+  <div id="tab-plantoes" class="tab-content active">
+    <div class="main-layout">
+      
+      <!-- Calendário Ocupando 100% da Largura -->
+      <div class="calendar-section" style="width: 100%;">
+        <div class="calendar-header">
+          <button id="prev-month">&lt; Anterior</button>
+          <h2 id="month-year-display">--</h2>
+          <button id="next-month">Próximo &gt;</button>
+        </div>
+
+        <div class="weekdays-grid" style="margin-bottom: 6px;">
+          <div>Dom</div>
+          <div>Seg</div>
+          <div>Ter</div>
+          <div>Qua</div>
+          <div>Qui</div>
+          <div>Sex</div>
+          <div>Sáb</div>
+        </div>
+
+        <div id="calendar-days" class="days-grid"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ABA 2: FÉRIAS -->
+  <div id="tab-ferias" class="tab-content">
+    <h2>🏖️ Controle de Férias da Equipe</h2>
+  </div>
+
+  <!-- ABA 3: ANIVERSÁRIOS -->
+  <div id="tab-aniversarios" class="tab-content">
+    <h2>🎂 Aniversariantes</h2>
+  </div>
+
+  <!-- ABA 4: SERVIDORES -->
+  <div id="tab-servidores" class="tab-content">
+    <h2>👥 Cadastro de Servidores</h2>
+    <ul class="servers-grid">
+      <li><strong>Fabiano</strong></li>
+      <li><strong>Luiz Marcelo</strong></li>
+      <li><strong>Marcelo Oliveira</strong></li>
+      <li><strong>Gilson</strong></li>
+      <li><strong>Amarildo</strong></li>
+      <li><strong>Alex</strong></li>
+      <li><strong>Sérgio Luís</strong></li>
+      <li><strong>Valnir</strong></li>
+      <li><strong>John</strong></li>
+    </ul>
+  </div>
+
+  <!-- ABA 5: RECADOS -->
+  <div id="tab-recados" class="tab-content">
+    <h2>📌 Quadro de Recados e Avisos</h2>
+    <p style="margin-bottom: 15px; color: #6c757d;">Painel de avisos gerais da equipe.</p>
+
+    <!-- Formulário para Adicionar Recado -->
+    <form id="note-form" style="display: flex; gap: 10px; margin-bottom: 20px; max-width: 600px;">
+      <input type="text" id="note-text" placeholder="Digite seu recado ou aviso aqui..." required style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 6px;">
+      <button type="submit" style="padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">Publicar Recado</button>
+    </form>
+
+    <hr style="margin-bottom: 20px; border: 0; border-top: 1px solid #dee2e6;">
+
+    <!-- Área onde os recados são exibidos -->
+    <div id="notes-list" style="display: flex; flex-direction: column; gap: 10px; max-width: 600px;"></div>
+  </div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
