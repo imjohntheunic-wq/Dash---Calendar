@@ -24,7 +24,7 @@
     <div class="main-layout">
       
       <!-- Calendário Ocupando 100% da Largura -->
-      <div class="calendar-section" style="width: 100%;">
+      <div class="calendar-section" style="width: 100%; flex: 1;">
         <div class="calendar-header">
           <button id="prev-month">&lt; Anterior</button>
           <h2 id="month-year-display">--</h2>
@@ -77,19 +77,19 @@
   <div id="tab-recados" class="tab-content">
     <h2>📌 Quadro de Recados e Avisos</h2>
     <p style="margin-bottom: 15px; color: #6c757d;">Painel de avisos gerais da equipe.</p>
-
-    <!-- Formulário para Adicionar Recado -->
-    <form id="note-form" style="display: flex; gap: 10px; margin-bottom: 20px; max-width: 600px;">
-      <input type="text" id="note-text" placeholder="Digite seu recado ou aviso aqui..." required style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 6px;">
-      <button type="submit" style="padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">Publicar Recado</button>
-    </form>
-
-    <hr style="margin-bottom: 20px; border: 0; border-top: 1px solid #dee2e6;">
-
-    <!-- Área onde os recados são exibidos -->
     <div id="notes-list" style="display: flex; flex-direction: column; gap: 10px; max-width: 600px;"></div>
   </div>
 
+</div>
+
+<!-- MODAL DE DETALHES DO DIA (POPUP MOBILE/DESKTOP) -->
+<div id="day-modal" class="modal" style="display: none;">
+  <div class="modal-content">
+    <span class="close-modal" onclick="closeDayModal()">&times;</span>
+    <h3 id="modal-date-title">Plantões do Dia</h3>
+    <hr style="margin: 10px 0; border: 0; border-top: 1px solid #eee;">
+    <div id="modal-events-list"></div>
+  </div>
 </div>
 
 <script src="script.js"></script>
