@@ -135,6 +135,7 @@ body {
   align-items: flex-start;
   background-color: #fff;
   transition: background-color 0.2s;
+  overflow-y: auto;
 }
 
 .days-grid div:hover { 
@@ -225,6 +226,7 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
 /* 🇧🇷 Feriados Nacionais */
 .type-feriado {
   background-color: #f8d7da !important;
@@ -279,38 +281,72 @@ body {
 }
 
 /* ==========================================
-   RESPONSIVIDADE (TELAS MENORES)
+   MODAL DE DETALHES DO DIA
    ========================================== */
-@media (max-width: 850px) {
-  .main-layout {
-    flex-direction: column;
-  }
-  
-  .sidebar {
-    border-left: none;
-    border-top: 1px solid #eee;
-    padding-left: 0;
-    padding-top: 20px;
-  }
-}
-/* Limita a altura dos dias para manter o padrão no calendário */
-.calendar-day {
-  min-height: 110px;
-  max-height: 130px; 
-  overflow-y: auto; 
+.modal {
+  position: fixed;
+  z-index: 9999;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 15px;
 }
 
-/* Deixa as tags dos eventos mais compactas */
-.event-tag {
-  padding: 2px 5px;
-  font-size: 0.75rem;
-  margin-bottom: 2px;
+.modal-content {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  max-width: 450px;
+  width: 100%;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+  position: relative;
+  animation: modalFadeIn 0.2s ease-out;
 }
+
+@keyframes modalFadeIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.close-modal {
+  position: absolute;
+  top: 12px;
+  right: 18px;
+  font-size: 24px;
+  font-weight: bold;
+  color: #aaa;
+  cursor: pointer;
+}
+
+.close-modal:hover {
+  color: #333;
+}
+
+#modal-events-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+  max-height: 350px;
+  overflow-y: auto;
+}
+
+#modal-events-list .event-tag {
+  font-size: 0.9rem;
+  padding: 8px 12px;
+  border-radius: 6px;
+  white-space: normal;
+}
+
 /* ==========================================
    AJUSTES RESPONSIVOS (TELAS MENORES / CELULAR)
    ========================================== */
 @media (max-width: 850px) {
-  /* Ajusta o espaçamento interno do app no celular */
   body {
     padding: 10px;
   }
@@ -320,7 +356,6 @@ body {
     width: 100%;
   }
 
-  /* Faz a barra lateral ir para baixo e não espremer o calendário */
   .main-layout {
     flex-direction: column;
   }
@@ -332,21 +367,18 @@ body {
     padding-top: 20px;
   }
 
-  /* Garante que os dias da semana e os números fiquem do mesmo tamanho */
   .weekdays-grid, 
   .days-grid {
-    grid-template-columns: repeat(7, minmax(0, 1fr)); /* Impede que os quadros 'vazem' a tela */
-    gap: 2px; /* Reduz o espaço entre os dias no celular */
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 3px;
   }
 
-  /* Ajusta o tamanho dos quadradinhos do dia no celular */
   .days-grid div {
-    min-height: 55px; /* Altura menor para caber melhor na tela do celular */
+    min-height: 60px;
     padding: 2px;
     font-size: 0.8rem;
   }
 
-  /* Esconde ou reduz o texto das tags para não estourar a largura do dia */
   .event-tag {
     font-size: 9px;
     padding: 1px 2px;
