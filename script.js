@@ -1,26 +1,21 @@
 // ==========================================
 // CONFIGURAÇÕES E VARIÁVEIS GLOBAIS
 // ==========================================
-// URL da sua Web App do Google Apps Script
 const GOOGLE_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwqmA6Vx2yHUmQ0xiLDNDN_nGDcoXHU-PipKqTP1B1cEtDr707-frJ66IC7PdRKq93ZTg/exec";
 
-// Data atual de referência para navegação
 let currentDate = new Date();
 
-// Carrega os dados salvos do localStorage
+// Carrega os dados salvos do localStorage de forma segura
 let events = JSON.parse(localStorage.getItem('calendar_events')) || {};
 let notes = JSON.parse(localStorage.getItem('calendar_notes')) || [];
 
-// Memória local para os feriados nacionais por ano
 let holidays = {};
 
-// Nomes dos meses em português
 const monthNames = [
   'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
 ];
 
-// Carrega os eventos salvos no navegador ao iniciar
 function loadSavedEvents() {
   const localData = localStorage.getItem('calendar_events');
   if (localData) {
@@ -53,7 +48,7 @@ window.openTab = function(tabId) {
 };
 
 // ==========================================
-// 2. BUSCA DE FERIADOS E DADOS REMOTOS
+// 2. BUSCA DE FERIADOS E DADOS REMOTOS (LOCAL FIRST + TIMEOUT)
 // ==========================================
 async function fetchHolidays(year) {
   try {
@@ -71,22 +66,41 @@ async function fetchHolidays(year) {
 }
 
 async function loadDataFromGoogleSheets() {
+  const year = currentDate.getFullYear();
+  const monthName = monthNames[currentDate.getMonth()];
+  const monthDisplay = `${monthName} ${year}`;
+
+  // AbortController para cancelar a chamada se o Apps Script demorar mais de 6 segundos
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 6000);
+
   try {
-    const monthDisplay = document.getElementById('month-year-display')?.textContent || 'Setembro 2026';
-    const response = await fetch(`${GOOGLE_WEB_APP_URL}?month=${encodeURIComponent(monthDisplay)}`);
-    
+    const response = await fetch(`${GOOGLE_WEB_APP_URL}?month=${encodeURIComponent(monthDisplay)}`, {
+      method: 'GET',
+      signal: controller.signal
+    });
+
+    clearTimeout(timeoutId);
+
     if (!response.ok) return;
     
     const remoteEvents = await response.json();
 
+    // Valida se o retorno é um objeto válido de eventos e não uma mensagem de erro
     if (remoteEvents && typeof remoteEvents === 'object' && !remoteEvents.status) {
-      // Atualiza os eventos com o que foi lido da planilha e re-renderiza a tela
-      events = remoteEvents;
+      // Mescla os dados da nuvem mantendo os locais
+      events = { ...events, ...remoteEvents };
       localStorage.setItem('calendar_events', JSON.stringify(events));
+      
+      // Atualiza a tela com as novidades trazidas do Google Sheets
       await renderCalendar();
     }
   } catch (error) {
-    console.warn("Aviso: Não foi possível carregar os dados da planilha.", error);
+    if (error.name === 'AbortError') {
+      console.warn("Nuvem demorou a responder. O sistema manteve a exibição rápida via cache.");
+    } else {
+      console.warn("Aviso: Não foi possível carregar os dados atualizados da planilha.", error);
+    }
   }
 }
 
@@ -97,7 +111,6 @@ async function renderCalendar() {
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
 
-  // Garante que os feriados do ano navegando foram carregados
   if (!holidays[year]) {
     await fetchHolidays(year);
   }
@@ -133,7 +146,7 @@ async function renderCalendar() {
       dayCell.classList.add('today');
     }
 
-    // 1. RENDERIZA FERIADO NACIONAL (se houver)
+    // 1. Feriado Nacional
     if (holidays[year] && holidays[year][dateStr]) {
       const holidayTag = document.createElement('span');
       holidayTag.className = 'event-tag type-feriado';
@@ -142,7 +155,7 @@ async function renderCalendar() {
       dayCell.appendChild(holidayTag);
     }
 
-    // 2. RENDERIZA PLANTÕES E EVENTOS DA EQUIPE
+    // 2. Eventos e Plantões
     if (events[dateStr]) {
       events[dateStr].forEach(ev => {
         const tag = document.createElement('span');
@@ -157,14 +170,8 @@ async function renderCalendar() {
           prefix = '🎂';
         } else if (ev.type === 'plantao') {
           const isDiurno = ev.shift === '06h-18h' || ev.shift === 'diurno';
-
-          if (isDiurno) {
-            typeClass = 'type-plantao-diurno';
-            prefix = '☀️';
-          } else {
-            typeClass = 'type-plantao-noturno';
-            prefix = '🌙';
-          }
+          typeClass = isDiurno ? 'type-plantao-diurno' : 'type-plantao-noturno';
+          prefix = isDiurno ? '☀️' : '🌙';
         } else {
           typeClass = `type-${ev.type}`;
         }
@@ -176,7 +183,6 @@ async function renderCalendar() {
       });
     }
 
-    // AO CLICAR NO DIA: Abre o Modal de Visualização
     dayCell.addEventListener('click', () => {
       openDayModal(dateStr);
     });
@@ -201,7 +207,6 @@ function openDayModal(dateStr) {
   title.innerText = `Plantões e Eventos - ${formattedDate}`;
   list.innerHTML = '';
 
-  // 1. Feriado Nacional
   if (holidays[year] && holidays[year][dateStr]) {
     const holidayItem = document.createElement('div');
     holidayItem.style.cssText = 'padding: 10px; background: #f8d7da; color: #721c24; border-radius: 6px; font-weight: bold; border-left: 4px solid #dc3545; margin-bottom: 8px;';
@@ -209,7 +214,6 @@ function openDayModal(dateStr) {
     list.appendChild(holidayItem);
   }
 
-  // 2. Eventos Agendados vindo da Planilha
   if (events[dateStr] && events[dateStr].length > 0) {
     events[dateStr].forEach((ev) => {
       const p = document.createElement('div');
@@ -229,7 +233,6 @@ function openDayModal(dateStr) {
       }
 
       p.style.borderLeft = `5px solid ${borderColor}`;
-
       let teamStr = ev.team ? ev.team.join(', ') : 'Sem servidor atribuído';
 
       p.innerHTML = `
@@ -248,13 +251,11 @@ function openDayModal(dateStr) {
   modal.style.display = 'flex';
 }
 
-// Função para fechar o Modal
 window.closeDayModal = function() {
   const modal = document.getElementById('day-modal');
   if (modal) modal.style.display = 'none';
 };
 
-// Fecha o modal se o usuário clicar fora da caixa do modal
 window.onclick = function(event) {
   const modal = document.getElementById('day-modal');
   if (event.target === modal) {
@@ -337,30 +338,28 @@ function renderNotes() {
 }
 
 // ==========================================
-// 7. EVENT LISTENERS E INICIALIZAÇÃO
+// 7. EVENT LISTENERS E INICIALIZAÇÃO INSTANTÂNEA
 // ==========================================
 document.addEventListener('DOMContentLoaded', async () => {
-
   loadSavedEvents();
+
+  // 1. Desenha o calendário INSTANTANEAMENTE usando dados locais
+  await renderCalendar();
+  renderNotes();
+
+  // 2. Busca na nuvem sem travar a interface
+  loadDataFromGoogleSheets();
 
   // Navegação de Mês
   document.getElementById('prev-month')?.addEventListener('click', async () => {
     currentDate.setMonth(currentDate.getMonth() - 1);
     await renderCalendar();
-    await loadDataFromGoogleSheets();
+    loadDataFromGoogleSheets();
   });
 
   document.getElementById('next-month')?.addEventListener('click', async () => {
     currentDate.setMonth(currentDate.getMonth() + 1);
     await renderCalendar();
-    await loadDataFromGoogleSheets();
+    loadDataFromGoogleSheets();
   });
-
-  // Inicializa a interface do sistema
-  await renderCalendar();
-  renderNotes();
-
-  // Tenta carregar agendamentos salvos na nuvem (Google Sheets)
-  loadDataFromGoogleSheets();
-
 });
